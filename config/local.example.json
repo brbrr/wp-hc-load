@@ -20,8 +20,7 @@
 		"defaultUser": [
 			"username",
 			"password",
-			"client_id",
-			"client_secret"
+			"locale" // used to join specific 'room' within single Support guy. Values: "en", "es", "pt-BR"
 		]
 	}
 }

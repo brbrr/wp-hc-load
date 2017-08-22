@@ -4,7 +4,7 @@ import config from 'config';
 
 const debug = require( 'debug' )( 'load:happychat:auth' );
 
-export default class HCAuth {
+export default class HCAuthenticator {
 	constructor() {
 		this.store = {
 			req: [],
@@ -13,8 +13,8 @@ export default class HCAuth {
 		};
 	}
 
-	doAuth() {
-		return this.login()
+	doAuth( account = 'defaultUser' ) {
+		return this.login( account )
 			.then( () => this.restProxy()
 				.then( () => this.me()
 					.then( () => this.session()
@@ -22,18 +22,20 @@ export default class HCAuth {
 						) ) ) )
 	}
 
-	login( account = 'defaultUser' ) {
-		const user = config.get( 'testAccounts' )[ account ]
+	login( account ) {
+		if ( account === undefined ) {
+			account = config.get( 'testAccounts' ).defaultUser
+		}
 		return axios( {
 			method: 'post',
 			url: 'https://wordpress.com/wp-login.php?action=login-endpoint',
 			data: querystring.stringify( {
-				username: user[0],
-				password: user[1],
+				username: account[0],
+				password: account[1],
 				remember_me: 'false',
 				redirect_to: 'http://calypso.localhost:3000/devdocs/welcome',
-				client_id: user[2],
-				client_secret: user[3],
+				client_id: config.get( 'clientId' ),
+				client_secret: config.get( 'clientSecret' )
 			} ),
 		} ).then( ( response ) => {
 			var cookies = response.headers['set-cookie'];
@@ -42,7 +44,7 @@ export default class HCAuth {
 			debug( '%O', response );
 		} ).catch( ( error ) => {
 			debug( '%O', error );
-			debug( `Make sure you have used valid user. Was used ${user}` )
+			console.error( `Make sure you have used valid user. Was used ${user}` )
 			throw new Error( 'on LOGIN Request' );
 		} );
 	}
@@ -64,8 +66,8 @@ export default class HCAuth {
 			this.store.req.push( response );
 			debug( '%O', response );
 		} ).catch( ( error ) => {
-			console.log( error );
-			debug( `Strange! Thats should pass smooth if valid cookies was used.\nHere cookies used: ${this.store.cookies}` )
+			debug( '%O', error );
+			console.error( `Strange! Thats should pass smooth if valid cookies was used.\nHere cookies used: ${this.store.cookies}` )
 
 			throw new Error( 'on restProxy request' );
 		} );
@@ -90,7 +92,8 @@ export default class HCAuth {
 			this.store.req.push( response );
 			debug( '%O', response );
 		} ).catch( ( error ) => {
-			console.log( error );
+			debug( '%O', error );
+			console.error( `There might be an issue with Auth Token. Take a look: ${this.store.vars.wpApi}` )
 			throw new Error( 'on ME' );
 		} );
 	}
@@ -113,7 +116,9 @@ export default class HCAuth {
 			this.store.req.push( response );
 			debug( '%O', response );
 		} ).catch( ( error ) => {
-			console.log( error );
+			debug( '%O', error );
+			console.error( `There might be an issue with Auth Token. Take a look: ${this.store.vars.wpApi}` )
+			throw new Error( 'on SESSION' );
 		} );
 	}
 
@@ -135,7 +140,9 @@ export default class HCAuth {
 			this.store.req.push( response );
 			debug( '%O', response );
 		} ).catch( ( error ) => {
-			console.log( error );
+			debug( '%O', error );
+			console.error( `There might be an issue with Auth Token. Take a look: ${this.store.vars.wpApi}` )
+			throw new Error( 'on JWT' );
 		} );
 	}
 
