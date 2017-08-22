@@ -1,0 +1,10 @@
+logs/
+node_modules/
+.idea/
+.DS_Store
+
+# Ignore all local config files, but keep the example there.
+config/local-*
+
+# http://direnv.net
+.envrc
