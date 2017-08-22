@@ -3,37 +3,32 @@ import IO from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
 const debug = require( 'debug' )( 'load:happychat:socket' );
 
-// var io = require( 'socket.io-client' )
-// var uuid = require( 'uuid' )
-
 export default class HCSocket {
-	// open( signer_user_id, jwt, locale, groups ) {
-	open( signer_user_id, jwt ) {
+	open( signer_user_id, jwt, locale = 'en' ) {
 		this.openSocket = new Promise( resolve => {
 			const url = config.get( 'happyChatURL' );
 			const socket = new IO( url );
 			socket
 				.once( 'connect', () => debug( 'connected' ) )
 				.on( 'init', () => {
-					console.log( 'INIT connected' );
+					debug( 'INIT connected' );
 					resolve( socket );
 				} )
 				.on( 'token', handler => {
-					console.log( 'TOKEN' + handler );
-					handler( { signer_user_id, jwt, locale: 'en', groups: ['WP.com'] } );
+					handler( { signer_user_id, jwt, locale, groups: ['WP.com'] } );
 				} )
 				.on( 'unauthorized', () => {
 					socket.close();
-					console.log( 'not authorized' );
+					debug( 'Not authorized!! Socket closed' );
 				} )
-				.on( 'disconnect', reason => console.log( 'disconnect' + reason ) )
-				.on( 'reconnecting', () => console.log( 'reconnecting' ) )
+				.on( 'disconnect', reason => debug( 'Disconnected: ' + reason ) )
+				.on( 'reconnecting', () => debug( 'reconnecting' ) )
 			// Received a chat message
-				.on( 'message', message => console.log( 'message' + message ) )
+				.on( 'message', message => debug( 'Receive message: ' + JSON.stringify( message ) ) )
 			// Received chat status new/assigning/assigned/missed/pending/abandoned
-				.on( 'status', status => console.log( 'status' + status ) )
+				.on( 'status', status => debug( 'Chat status update: ' + status ) )
 			// If happychat is currently accepting chats
-				.on( 'accept', accept => console.log( 'accept' + accept ) );
+				.on( 'accept', accept => debug( 'HC is accepting chats' + accept ) );
 		} );
 		return this.openSocket;
 	}
@@ -42,7 +37,7 @@ export default class HCSocket {
 		this.openSocket
 			.then(
 				( socket ) => socket.emit( 'message', { text: message, id: uuid() } ),
-				( e ) => console.log( 'failed to send message' + e )
+				( e ) => debug( 'failed to send message: ' + e )
 			);
 	}
 
