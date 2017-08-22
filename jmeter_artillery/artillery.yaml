@@ -1,0 +1,123 @@
+config:
+  target: "https://wordpress.com"
+  http:
+    tls:
+      rejectUnauthorized: false
+  socketio:
+    transports: ["websocket"]
+  phases:
+    - duration: 10
+    #   arrivalRate: 0.1
+      arrivalCount: 1
+  processor: "./functions.js"
+  payload:
+    # path is relative to the location of the test script
+    path: "users.csv"
+    fields:
+      - "username"
+      - "password"
+scenarios:
+  - name: "AUTH"
+    engine: "socketio"
+    flow:
+      # LOGIN
+      - post:
+          url: "https://wordpress.com/wp-login.php?action=login-endpoint"
+          headers:
+            Connection: "keep-alive"
+            Referer: "http://calypso.localhost:3000/"
+            Origin: "http://calypso.localhost:3000"
+            Content-Type: "application/x-www-form-urlencoded"
+            DNT: 1
+            User-Agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0"
+            Content-Length: 227
+            Host: "wordpress.com"
+          body: "username=brbrrtest1&password=pswd4BrbrrTest1&remember_me=false&redirect_to=http%3A%2F%2Fcalypso.localhost%3A3000%2Fdevdocs%2Fwelcome&client_id=39911&client_secret=cOaYKdrkgXz8xY7aysv4fU6wL6sK5J8a6ojReEIAPwggsznj4Cb6mW0nffTxtYT8"
+          capture:
+            json: "$"
+            as: "data"
+      # - log: "Response data {{ data }}"
+      # WP API
+      - get:
+          url: "https://public-api.wordpress.com/wp-admin/rest-proxy/"
+          afterResponse: ["extractWpApi"]
+      # - log: "Response wpApi {{ wpApi }}"
+      # - log: "Response wpApiSec {{ wpApiSec }}"
+      # ME USD_INFO
+      - get:
+          url: "https://public-api.wordpress.com/rest/v1.1/me?http_envelope=1&meta=flags"
+          headers:
+            Authorization: "X-WPCOOKIE {{ wpApi }}:1:http://calypso.localhost:3000"
+          capture:
+            - json: "$.body.ID"
+              as: "usrId"
+            - json: "$.body"
+              transform: "JSON.parse(JSON.stringify(this.usrInfo));"
+              as: "usrInfo"
+          # afterResponse: ["logHeaders"]
+      # IO SESSION
+      - post:
+          url: "https://public-api.wordpress.com/rest/v1/happychat/session?http_envelope=1"
+          headers:
+            Authorization: "X-WPCOOKIE {{ wpApi }}:1:http://calypso.localhost:3000"
+          capture:
+            - json: "$.body.session_id"
+              as: "sessionId"
+          # afterResponse: ["logHeaders"]
+      # - log: "Response sessionId {{ sessionId }}"
+      # JWT SIGN IN
+
+
+      - post:
+          url: "https://public-api.wordpress.com/rest/v1/jwt/sign?http_envelope=1"
+          headers:
+            Authorization: "X-WPCOOKIE {{ wpApi }}:1:http://calypso.localhost:3000"
+          capture:
+            - json: "$.body"
+              as: "jwt"
+          beforeRequest: "prepJwtReq"
+          # afterResponse: ["logHeaders"]
+      # IO SID
+      - get:
+          url: "https://happychat-io-staging.go-vip.co/socket.io/?EIO=3&transport=polling"
+          capture:
+            regexp: 'sid":"(.+?)"(.+?)'
+            group: 1
+            as: "sid"
+          beforeRequest: "addTimestamp"
+          # afterResponse: ["logHeaders", "logResponse"]
+      - post:
+          url: "https://happychat-io-staging.go-vip.co/socket.io/?EIO=3&transport=polling&sid={{ sid }}"
+          body: "11:40/customer"
+          beforeRequest: "addTimestamp"
+          # afterResponse: ["logHeaders", "logResponse"]
+      - get:
+          url: "https://happychat-io-staging.go-vip.co/socket.io/?EIO=3&transport=polling&sid={{ sid }}"
+          beforeRequest: "addTimestamp"
+          afterResponse: ["logHeaders", "logResponse"]
+      # - log: "Response {{ sid }}"
+      # - get:
+      #     url: "https://happychat-io-staging.go-vip.co/socket.io/?EIO=3&transport=websocket&sid={{ sid }}"
+      #     beforeRequest: "addTimestamp"
+      #     afterResponse: ["logHeaders", "logResponse"]
+      # - emit:
+      #     channel: "echo"
+      #     data: "hello"
+          # response:
+          #   channel: "echoed"
+          #   data: "hello"
+  - name: "Socket.IO"
+    engine: "socketio"
+    flow:
+      - get:
+          url: "wss://happychat-io-staging.go-vip.co/customer"
+      - emit:
+          channel: "42"
+          data: "hello"
+          response:
+            channel: "echoed"
+            data: "helasdasaslo"
+            namespace: "/customer"
+      - think: 1
+
+
