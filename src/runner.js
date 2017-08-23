@@ -10,6 +10,9 @@ const poll = config.get( 'pollingTime' )
 
 Object.keys( accounts ).forEach( account => {
 	const user = config.get( 'testAccounts' )[ account ]
+	if ( user === undefined ) {
+		throw new Error( `Account key '${account}' not found in the configuration` );
+	}
 	const interval = poll + ( Math.random() * 10 )
 
 	const auth = new HCAuthenticator();
