@@ -3,5 +3,5 @@
 	"wpApiEndPoint": "https://public-api.wordpress.com",
 	"pollingTime": 10, // sec
 	"clientId": "39911",
-	"clientSecret": "cOaYKdrkgXz8xY7aysv4fU6wL6sK5J8a6ojReEIAPwggsznj4Cb6mW0nffTxtYT8",
+	"clientSecret": "cOaYKdrkgXz8xY7aysv4fU6wL6sK5J8a6ojReEIAPwggsznj4Cb6mW0nffTxtYT8"
 }
