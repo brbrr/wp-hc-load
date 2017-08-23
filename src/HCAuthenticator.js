@@ -7,7 +7,7 @@ const debug = require( 'debug' )( 'load:happychat:auth' );
 export default class HCAuthenticator {
 	constructor() {
 		this.store = {
-			req: [],
+			req: [], // For debugging purposes. TODO: Delete it.
 			vars: {},
 			cookies: []
 		};
@@ -44,7 +44,7 @@ export default class HCAuthenticator {
 			debug( '%O', response );
 		} ).catch( ( error ) => {
 			debug( '%O', error );
-			console.error( `Make sure you have used valid user. Was used ${user}` )
+			console.error( `Make sure you have used valid user. Was used ${account}` )
 			throw new Error( 'on LOGIN Request' );
 		} );
 	}

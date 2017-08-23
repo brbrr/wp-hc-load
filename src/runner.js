@@ -5,11 +5,11 @@ import config from 'config';
 const accounts = config.get( 'testAccounts' )
 const poll = config.get( 'pollingTime' )
 
-// TODO:
-// Define some terminate function to nicely close socket for every user.
+let sockets = [];
 
 Object.keys( accounts ).forEach( account => {
 	const user = config.get( 'testAccounts' )[ account ]
+	debugger;
 	if ( user === undefined ) {
 		throw new Error( `Account key '${account}' not found in the configuration` );
 	}
@@ -18,9 +18,27 @@ Object.keys( accounts ).forEach( account => {
 	const auth = new HCAuthenticator();
 	auth.doAuth( user ).then( () => {
 		const socket = new HCSocket();
+		sockets.push( socket );
 		socket.open( auth.store.vars.usrId, auth.store.vars.jwt, user[2] )
 		setInterval( () => {
 			socket.send( `Sending message every ${interval} sec. Sent at: ` + Date.now() )
 		}, interval * 1000 ); // repeat forever, polling every  seconds
 	} );
 } )
+
+
+// TODO:
+// Define some terminate function to nicely close socket for every user.
+process.on( 'SIGINT', () => {
+	closeAllSockets( sockets ).then( () => process.exit(0) );
+} );
+
+function closeAllSockets( ary ) {
+	return new Promise( ( resolve ) => {
+		console.log( `Closing all streams. Total: ${sockets.length}` );
+		ary.forEach( ( socket ) => {
+			return socket.openSocket.then( ( s ) => s.close() );
+		} )
+		setTimeout( () => ( resolve() ), 1000 );
+	} )
+}
