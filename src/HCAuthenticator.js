@@ -44,7 +44,7 @@ export default class HCAuthenticator {
 			debug( '%O', response );
 		} ).catch( ( error ) => {
 			debug( '%O', error );
-			console.error( `Make sure you have used valid user. Was used ${account}` )
+			console.error( `Make sure you have used valid user. Was used ${account[0]}` )
 			throw new Error( 'on LOGIN Request' );
 		} );
 	}
