@@ -1,5 +1,5 @@
-import HCAuthenticator from './HCAuthenticator';
-import HCSocket from './HCSocket';
+import HCAuthenticator from './he/HCAuthenticator';
+import HCSocket from './he/HCSocket';
 import config from 'config';
 import pry from 'pryjs';
 
@@ -8,6 +8,7 @@ const poll = config.get( 'pollingTime' )
 
 let sockets = [];
 
+// TODO: Review and mb fix it.
 Object.keys( accounts ).forEach( account => {
 	const user = config.get( 'testAccounts' )[ account ]
 	if ( user === undefined ) {
