@@ -1,12 +1,14 @@
 import config from 'config';
 import IO from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
-const debug = require( 'debug' )( 'load:happychat:socket' );
+
+const debug = require( 'debug' )( 'load:happychat:cli' );
 
 export default class HCSocket {
 	open( signer_user_id, jwt, locale = 'en' ) {
+		this.messages = {};
 		this.openSocket = new Promise( resolve => {
-			const url = config.get( 'happyChatURL' );
+			const url = config.get( 'happyChatURL' ) + '/customer';
 			const socket = new IO( url );
 			socket
 				.once( 'connect', () => debug( 'connected' ) )
@@ -24,19 +26,43 @@ export default class HCSocket {
 				.on( 'disconnect', reason => debug( 'Disconnected: ' + reason ) )
 				.on( 'reconnecting', () => debug( 'reconnecting' ) )
 			// Received a chat message
-				.on( 'message', message => debug( 'Receive message: ' + JSON.stringify( message ) ) )
+				.on( 'message', message => {
+					if ( this.messages[message.id] ) {
+						this.messages[message.id].push( Date.now() );
+						console.log( Date.now() - this.messages[message.id][0] );
+					}
+					return debug( 'Receive message: ' + JSON.stringify( message ) )
+				} )
 			// Received chat status new/assigning/assigned/missed/pending/abandoned
 				.on( 'status', status => debug( 'Chat status update: ' + status ) )
 			// If happychat is currently accepting chats
-				.on( 'accept', accept => debug( 'HC is accepting chats' + accept ) );
+				.on( 'accept', accept => debug( 'HC is accepting chats' + accept ) )
+				.on( 'pong', ( latency ) => console.log( `PONG LAT: ${latency}` ) );
 		} );
 		return this.openSocket;
 	}
 
-	send( message ) {
+	emit( event, data ) {
 		this.openSocket
 			.then(
-				( socket ) => socket.emit( 'message', { text: message, id: uuid() } ),
+				( socket ) => {
+					return socket.emit( event, data )
+				},
+				( e ) => debug( 'failed to send message: ' + e )
+			);
+	}
+
+	message( message ) {
+		this.openSocket
+			.then(
+				( socket ) => {
+					const id = uuid();
+					const timeNow = Date.now();
+					this.messages[id] = [timeNow];
+					return socket.send(
+						{ text: message, id: id },
+						( data ) => console.log( Date.now() - timeNow ) )
+				},
 				( e ) => debug( 'failed to send message: ' + e )
 			);
 	}

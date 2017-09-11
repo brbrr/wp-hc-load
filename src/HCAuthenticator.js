@@ -13,13 +13,19 @@ export default class HCAuthenticator {
 		};
 	}
 
-	doAuth( account = 'defaultUser' ) {
+	doAuth( account = config.get( 'testAccounts' ).defaultUser ) {
+		// return this.login( account )
+		// 	.then( () => this.restProxy()
+		// 		.then( () => this.me()
+		// 			.then( () => this.session()
+		// 				.then( () => this.signJwt()
+		// 				) ) ) )
 		return this.login( account )
-			.then( () => this.restProxy()
-				.then( () => this.me()
-					.then( () => this.session()
-						.then( () => this.signJwt()
-						) ) ) )
+			.then( () => this.restProxy() )
+			.then( () => this.me() )
+			.then( () => this.session() )
+			.then( () => this.signJwt() )
+			.then( () =>this.validateJWT() )
 	}
 
 	login( account ) {
@@ -33,7 +39,6 @@ export default class HCAuthenticator {
 				username: account[0],
 				password: account[1],
 				remember_me: 'false',
-				redirect_to: 'http://calypso.localhost:3000/devdocs/welcome',
 				client_id: config.get( 'clientId' ),
 				client_secret: config.get( 'clientSecret' )
 			} ),
@@ -75,14 +80,6 @@ export default class HCAuthenticator {
 
 	me() {
 		return axios( this.apiObject( 'get', '/rest/v1.1/me' )
-		// 	{
-		// 	method: 'get',
-		// 	url: config.get( 'wpApiEndPoint' ) + '/rest/v1.1/me', //?http_envelope=1&meta=flags",
-		// 	headers: {
-		// 		Authorization: 'X-WPCOOKIE ' + this.store.vars.wpApi + ':1:http://calypso.localhost:3000',
-		// 		Cookie: this.store.cookies.join( '; ' ),
-		// 	}
-		// }
 		).then( ( response ) => {
 			var cookies = response.headers['set-cookie'];
 			this.store.cookies = this.store.cookies.concat( cookies.map( ( el ) => el.match( /(.+?);/ )[0] ) )
@@ -100,14 +97,6 @@ export default class HCAuthenticator {
 
 	session() {
 		return axios( this.apiObject( 'post', '/rest/v1/happychat/session' )
-		// 	{
-		// 	method: 'post',
-		// 	url: config.get( 'wpApiEndPoint' ) + '/rest/v1/happychat/session',
-		// 	headers: {
-		// 		Authorization: 'X-WPCOOKIE ' + this.store.vars.wpApi + ':1:http://calypso.localhost:3000',
-		// 		Cookie: this.store.cookies.join( '; ' ),
-		// 	}
-		// }
 		).then( ( response ) => {
 			var cookies = response.headers['set-cookie'];
 			this.store.cookies = this.store.cookies.concat( cookies.map( ( el ) => el.match( /(.+?);/ )[0] ) )
@@ -143,6 +132,24 @@ export default class HCAuthenticator {
 			debug( '%O', error );
 			console.error( `There might be an issue with Auth Token. Take a look: ${this.store.vars.wpApi}` )
 			throw new Error( 'on JWT' );
+		} );
+	}
+
+	validateJWT() {
+		return axios( Object.assign(
+			this.apiObject( 'post', '/rest/v1/jwt/validate' ),
+			{
+				data: {
+					signer_user_id: this.store.vars.usrId,
+					jwt: this.store.vars.jwt
+				} } )
+		).then( ( response ) => {
+			this.store.req.push( response );
+			debug( '%O', response );
+		} ).catch( ( error ) => {
+			debug( '%O', error );
+			console.error( 'Auth Token didnt pass validation :c' )
+			throw new Error( 'on JWTValidation' );
 		} );
 	}
 

@@ -1,6 +1,6 @@
 # HappyChat Socket.IO user emitter
 
-This tool designed to simulate HappyChat user activity. It uses `axios` for HTTP requests, and `socket.io-client` for all socket actions. At the moment it can only authenticate and send messages to HC. 
+This tool designed to simulate HappyChat user activity. It uses `axios` for HTTP requests, and `socket.io-client` for all socket actions. At the moment it can only authenticate and send messages to HC.
 
 It was tested on 20 concurrent users and it seems work fine. Right now I'm not sure about possible concurrency limitations. Generating high load is not guarantied.
 
