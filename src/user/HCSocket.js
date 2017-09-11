@@ -13,7 +13,8 @@ export default class HCSocket {
 			socket
 				.once( 'connect', () => debug( 'connected' ) )
 				.on( 'init', () => {
-					debug( 'INIT connected' );
+					debug( 'INIT' );
+					this.connected = true;
 					resolve( socket );
 				} )
 				.on( 'token', handler => {
@@ -36,7 +37,7 @@ export default class HCSocket {
 			// Received chat status new/assigning/assigned/missed/pending/abandoned
 				.on( 'status', status => debug( 'Chat status update: ' + status ) )
 			// If happychat is currently accepting chats
-				.on( 'accept', accept => debug( 'HC is accepting chats' + accept ) )
+				.on( 'accept', accept => debug( 'HC is accepting chats ' + accept ) )
 				.on( 'pong', ( latency ) => console.log( `PONG LAT: ${latency}` ) );
 		} );
 		return this.openSocket;

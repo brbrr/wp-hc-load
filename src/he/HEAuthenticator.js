@@ -37,7 +37,7 @@ export default class HEAuthenticator {
 
 	login( user ) {
 		if ( user === undefined ) {
-			user = config.get( 'HETestAccounts' ).defaultUser2
+			user = config.get( 'HETestAccounts' ).defaultUser
 		}
 		return axios( {
 			method: 'post',

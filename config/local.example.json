@@ -22,5 +22,13 @@
 			"password",
 			"locale" // used to join specific 'room' within single Support guy. Values: "en", "es", "pt-BR"
 		]
+	},
+	"HETestAccounts": {
+		"defaultHEUser": [
+			"username",
+			"password",
+			"clientID",
+			"clientSecret"
+		]
 	}
 }

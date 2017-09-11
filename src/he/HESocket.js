@@ -92,6 +92,8 @@ export default class HESocket {
 		} );
 
 		socket.on( 'init', user => {
+			// TODO: Review after which event - HE become connected (can interact w/ socket)
+			this.connected = true;
 			debug( 'socket.init', user );
 		} );
 
