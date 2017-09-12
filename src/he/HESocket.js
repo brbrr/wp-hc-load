@@ -270,4 +270,12 @@ export default class HESocket {
 			clearInterval( this.reconnectCountdown );
 		}
 	}
+
+	setOperationStatus( status ) {
+		return this.withSocket()
+			.then( ( socket => socket.emit(
+				'broadcast.dispatch',
+				{ type: 'SET_OPERATOR_STATUS', status: status }
+			) ) )
+	}
 }
