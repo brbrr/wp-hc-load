@@ -6,7 +6,7 @@ import runHC from './user'
 const accounts = config.get( 'testAccounts' )
 let sockets = [];
 let usersCount = 1;
-if ( process.env.COUNT ) {
+if ( process.env.COUNT && process.env.COUNT > 1 ) {
 	usersCount = process.env.COUNT;
 }
 
