@@ -3,6 +3,15 @@ import pry from 'pryjs';
 
 import runHC from './user'
 
+const accounts = config.get( 'testAccounts' )
 let sockets = [];
-const socket = runHC();
-sockets.push( socket );
+let usersCount = 1;
+if ( process.env.COUNT ) {
+	usersCount = process.env.COUNT;
+}
+
+for ( let i = 0; i < usersCount; i++ ) {
+	let user = accounts[Object.keys( accounts )[i]]
+	const socket = runHC( user );
+	sockets.push( socket );
+}

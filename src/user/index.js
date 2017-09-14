@@ -6,7 +6,7 @@ import HCSocket from './HCSocket';
 
 export function setupCli( user ) {
 	if ( user === undefined ) {
-		user = config.get( 'testAccounts' ).defaultHEUser
+		user = config.get( 'testAccounts' ).defaultUser
 	}
 	let socket;
 	const auth = new HCAuthenticator();
