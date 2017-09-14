@@ -16,9 +16,10 @@ There is requirement for HE account - it should be a11n account, which means tha
 
 ## How to run
 
-**To run simulation execute `./node_modules/.bin/babel-node ./src/runner.js`**
+First of all you should start HE runner: `./node_modules/.bin/babel-node ./src/HERunner.js`
 
-Script will fetch all the `testAccounts` from config and then will open the socket and start to send a messages within some predefined `pollingTime` interval
+Then, depending on how many users you want, execute: `COUNT=X ./node_modules/.bin/babel-node ./src/UserRunner.js`
+where `COUNT` is number of concurrent users to run. If omitted - will launch 1 user
 
 TODO:
 
