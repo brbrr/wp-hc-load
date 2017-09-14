@@ -1,15 +1,16 @@
-import HCAuthenticator from './HCAuthenticator';
-import HCSocket from './HCSocket';
+import HCAuthenticator from './he/HCAuthenticator';
+import HCSocket from './he/HCSocket';
 import config from 'config';
+import pry from 'pryjs';
 
 const accounts = config.get( 'testAccounts' )
 const poll = config.get( 'pollingTime' )
 
 let sockets = [];
 
+// TODO: Review and mb fix it.
 Object.keys( accounts ).forEach( account => {
 	const user = config.get( 'testAccounts' )[ account ]
-	debugger;
 	if ( user === undefined ) {
 		throw new Error( `Account key '${account}' not found in the configuration` );
 	}
@@ -21,15 +22,18 @@ Object.keys( accounts ).forEach( account => {
 		sockets.push( socket );
 		socket.open( auth.store.vars.usrId, auth.store.vars.jwt, user[2] )
 		setInterval( () => {
-			socket.send( `Sending message every ${interval} sec. Sent at: ` + Date.now() )
+			socket.emit( 'ping', 1 );
+			socket.message( `Sending message every ${interval} sec. Sent at: ` + Date.now() );
 		}, interval * 1000 ); // repeat forever, polling every  seconds
 	} );
 } )
 
+eval( pry.it )
 
 // TODO:
 // Define some terminate function to nicely close socket for every user.
 process.on( 'SIGINT', () => {
+	console.log( 'Terminating sockets' )
 	closeAllSockets( sockets ).then( () => process.exit(0) );
 } );
 
@@ -39,6 +43,6 @@ function closeAllSockets( ary ) {
 		ary.forEach( ( socket ) => {
 			return socket.openSocket.then( ( s ) => s.close() );
 		} )
-		setTimeout( () => ( resolve() ), 1000 );
+		return setTimeout( () => ( resolve() ), 1000 );
 	} )
 }

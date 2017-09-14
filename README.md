@@ -1,14 +1,20 @@
 # HappyChat Socket.IO user emitter
 
-This tool designed to simulate HappyChat user activity. It uses `axios` for HTTP requests, and `socket.io-client` for all socket actions. At the moment it can only authenticate and send messages to HC. 
+This tool designed to simulate HappyChat users. It uses `axios` for HTTP requests, and `socket.io-client` for all socket actions.
+
+It is possible to simulate both users and HE's. 
 
 It was tested on 20 concurrent users and it seems work fine. Right now I'm not sure about possible concurrency limitations. Generating high load is not guarantied.
 
+## Before run
+
+User and HE runners should be executed in separate terminals. Before running this tool you need to provide list (or at least 1) user account in config file, and it you plan to run HE - at least 1 HE account. Check `local.example.json` for more details.
+
+When running only users - make sure there at least 1 HappyChat support user is online and available (so users would be able to send their messages to someone).
+
+There is requirement for HE account - it should be a11n account, which means that you can not use test accounts as HE(at least for now). To be able to login HE account should have created app (web type) and provide its `client_id` & `client_secret`. For these accounts who have 2-factor auth(like mine), you need to generate app password as described [here](http://en.support.wordpress.com/security/two-step-authentication/).
+
 ## How to run
-
-Before running this tool you need to provide list (or at least 1) user account in config file. Check `local.example.json` for more details.
-
-Also, make sure there at least 1 HappyChat support user is online and available (so users would be able to send their messages to someone)
 
 **To run simulation execute `./node_modules/.bin/babel-node ./src/runner.js`**
 
