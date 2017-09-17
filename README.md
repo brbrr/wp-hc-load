@@ -21,7 +21,7 @@ First of all you should start HE runner: `./node_modules/.bin/babel-node ./src/H
 Then, depending on how many users you want, execute: `COUNT=X ./node_modules/.bin/babel-node ./src/UserRunner.js`
 where `COUNT` is number of concurrent users to run. If omitted - will launch 1 user
 
-TODO:
+## TODO:
 
 - Research for tools or maybe think of how to define different socket actions and situations. [`k6`](https://github.com/loadimpact/k6) - maybe not possible to use npm libraries. investigations is required.
 - Think about how to create load: run multiple sockets for different users. As one of the approaches: separate init and load logic, and run load part in `while(true)` loop after init part is completed.
